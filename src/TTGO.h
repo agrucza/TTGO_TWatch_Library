@@ -61,10 +61,6 @@ Written by Lewis he //https://github.com/lewisxhe
 #include "drive/s7xg/s7xg.h"
 #endif
 
-#ifdef LILYGO_WATCH_LVGL
-#include "lvgl/lvgl.h"
-#endif
-
 #ifdef LILYGO_WATCH_HAS_AXP202
 #include "drive/axp/axp20x.h"
 #endif
