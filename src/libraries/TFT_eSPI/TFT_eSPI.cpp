@@ -5491,7 +5491,7 @@ void *TFT_eSprite::callocSprite(int16_t w, int16_t h, uint8_t frames)
 
     if (_bpp == 16) {
 #if defined (ESP32) && defined (CONFIG_SPIRAM_SUPPORT)
-        if ( psramFound() && this->_psram_enable && !_tft->DMA_Enabled) ptr8 = ( uint8_t *) ps_calloc(frames * w * h + frames, sizeof(uint16_t));
+        if ( psramFound() && this->_psram_enable) ptr8 = ( uint8_t *) ps_calloc(frames * w * h + frames, sizeof(uint16_t));
         else
 #endif
             ptr8 = ( uint8_t *) calloc(frames * w * h + frames, sizeof(uint16_t));
