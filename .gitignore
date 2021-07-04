@@ -4,6 +4,7 @@ build
 make
 bin
 .gitignore
+examples
 src/lv_conf.h
 src/font
 src/imgs

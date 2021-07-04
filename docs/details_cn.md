@@ -28,7 +28,7 @@
 
 1. 该库已经包含`T-Watch`所有硬件驱动
 2. 使用**TFT_eSPI** 作为显示屏驱动，可直接通过通过构造对象调用**TFT_eSPI**的方法
-3. 使用**lvgl v7.3.1**作为显示图形框架,驱动方法已经实现，只需要按自己的需求调用lvgl api即可
+3. 使用**lvgl v7.7.2**作为显示图形框架,驱动方法已经实现，只需要按自己的需求调用lvgl api即可
 4. 关于lvgl的使用请参考 **[lvgl 文档](https://docs.lvgl.io/v7/en/html/)**
   
 
@@ -39,14 +39,9 @@
 
 <h2 align = "left">如何找到示例程序</h2>
 
-* T-Watch
+* T-Watch & LilyPi
 - 在Arduino IDE 菜单中选择 工具 -> 开发板 ->  `TTGO T-Watch`
 - 在Arduino IDE 菜单中选择 文件 -> 示例 -> `TTGO_TWatch_Library`
-
-* LilyPi
-- 在Arduino IDE 菜单中选择 工具 -> 开发板 ->  `ESP32 Dev Module`
-- 在Arduino IDE 菜单中选择 文件 -> 示例 -> `TTGO_TWatch_Library`
-
   
 <h2 align = "left">安装方法</h2>
 
@@ -62,14 +57,19 @@
   
 <h2 align = "left">注意事项</h2>
 
-- T-Watch-2019 : 由于Twatch使用了特殊IO作为SD接口，下载程序时候请移除SD卡
-- LilyPi       : 由于LilyPi使用了特殊IO作为SD接口，下载程序时候请移除SD卡
+- T-Watch-2019 & LilyPi: 由于使用了特殊IO作为SD接口，下载程序时候请移除SD卡
 
-<h2 align = "left">其他</h2>
+ <h2 align = "left">🔷 资源和说明 </h2>
 
-- [功耗详情点击查看](../docs/power.md)
-- [引脚映射点击查看](../docs/pinmap.md)
-- [3D外壳](https://github.com/Xinyuan-LilyGO/LilyGo-TWatch-DataSheet/tree/master/3DSHELL)
-- [硬件手册](https://github.com/Xinyuan-LilyGO/LilyGo-TWatch-DataSheet)
-- [Acsip S76/78 Library&Examples](https://github.com/lewisxhe/Acsip-S7xG-Library)
+- [LilyPi 引脚映射和其他说明](../docs/lilypi_pinmap.md)
+- [TWATCH 2019 系列引脚映射和其他说明](../docs/watch_2019.md)
+- [TWATCH 2020 V1 引脚映射和其他说明](../docs/watch_2020_v1.md)
+- [TWATCH 2020 V2 引脚映射和其他说明](../docs/watch_2020_v2.md)
+
+
+
+
+
+
+
 

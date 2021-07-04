@@ -266,6 +266,7 @@ github:https://github.com/lewisxhe/AXP202X_Libraries
 #define AXP202_VBUS_VOLTAGE_STEP (1.7F)
 #define AXP202_VBUS_CUR_STEP (0.375F)
 #define AXP202_INTERNAL_TEMP_STEP (0.1F)
+#define AXP202_INTERNAL_TEMP_MIN (-144.7F)
 #define AXP202_APS_VOLTAGE_STEP (1.4F)
 #define AXP202_TS_PIN_OUT_STEP (0.8F)
 #define AXP202_GPIO0_STEP (0.5F)
@@ -642,10 +643,16 @@ public:
     int setTimer(uint8_t minutes);
     int offTimer();
     int clearTimerStatus();
+
     /**
      * param:   axp202_startup_time_t or axp192_startup_time_t
      */
     int setStartupTime(uint8_t param);
+
+    /**
+     * Return : LongPress threshold x10 (so 15 = 1.5s)
+     */
+    int getStartupTime();
 
     /**
      * param: axp_loonPress_time_t
@@ -653,9 +660,19 @@ public:
     int setlongPressTime(uint8_t param);
 
     /**
+     * Return : LongPress threshold x10 (so 15 = 1.5s)
+     */
+	int getlongPressTime();
+
+    /**
      * @param  param: axp_poweroff_time_t
      */
     int setShutdownTime(uint8_t param);
+
+    /**
+     * Return : shutdown Press threshold x10 (so 15 = 1.5s)
+     */
+	int getShutdownTime();
 
     int setTimeOutShutdown(bool en);
 
@@ -745,6 +762,13 @@ public:
     // When the chip is axp202 allows maximum charging current of 1800mA, minimum 300mA
     int getChargeControlCur();
     int setChargeControlCur(uint16_t mA);
+
+		// Read register value at reg address 
+	uint8_t readRegister( uint8_t reg ){
+		uint8_t dt;
+		_readByte( reg, 1, &dt );
+		return dt;
+	}
 
 private:
     uint16_t _getRegistH8L5(uint8_t regh8, uint8_t regl5)

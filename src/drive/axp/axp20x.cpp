@@ -203,8 +203,12 @@ int AXP20X_Class::setPowerOutPut(uint8_t ch, bool en)
             _writeByte(AXP173_EXTEN_DC2_CTL, 1, &data);
         }
     }
+    // Before setting, the output cannot be all turned off
+    do {
+        _readByte(AXP202_LDO234_DC23_CTL, 1, &data);
+        delay(1);
+    } while (data == 0);
 
-    _readByte(AXP202_LDO234_DC23_CTL, 1, &data);
     if (en) {
         data |= (1 << ch);
     } else {
@@ -214,7 +218,6 @@ int AXP20X_Class::setPowerOutPut(uint8_t ch, bool en)
     if (_chip_id == AXP202_CHIP_ID) {
         FORCED_OPEN_DCDC3(data); //! Must be forced open in T-Watch
     }
-
     _writeByte(AXP202_LDO234_DC23_CTL, 1, &data);
     delay(1);
     _readByte(AXP202_LDO234_DC23_CTL, 1, &val);
@@ -275,7 +278,7 @@ float AXP20X_Class::getTemp()
 {
     if (!_init)
         return AXP_NOT_INIT;
-    return _getRegistResult(AXP202_INTERNAL_TEMP_H8, AXP202_INTERNAL_TEMP_L4) * AXP202_INTERNAL_TEMP_STEP;
+    return _getRegistResult(AXP202_INTERNAL_TEMP_H8, AXP202_INTERNAL_TEMP_L4) * AXP202_INTERNAL_TEMP_STEP + AXP202_INTERNAL_TEMP_MIN;
 }
 
 float AXP20X_Class::getTSTemp()
@@ -405,7 +408,7 @@ uint8_t AXP20X_Class::getCoulombRegister()
 int AXP20X_Class::setCoulombRegister(uint8_t val)
 {
     if (!_init)
-        return AXP_NOT_INIT;    
+        return AXP_NOT_INIT;
     _writeByte(AXP202_COULOMB_CTL, 1, &val);
     return AXP_PASS;
 }
@@ -413,47 +416,47 @@ int AXP20X_Class::setCoulombRegister(uint8_t val)
 
 int AXP20X_Class::EnableCoulombcounter(void)
 {
-   
-     if (!_init)
-        return AXP_NOT_INIT;    
-     uint8_t val = 0x80;    
+
+    if (!_init)
+        return AXP_NOT_INIT;
+    uint8_t val = 0x80;
     _writeByte(AXP202_COULOMB_CTL, 1, &val);
-    return AXP_PASS;    
+    return AXP_PASS;
 }
 
 int AXP20X_Class::DisableCoulombcounter(void)
 {
-   
-     if (!_init)
-        return AXP_NOT_INIT;    
-     uint8_t val = 0x00;    
+
+    if (!_init)
+        return AXP_NOT_INIT;
+    uint8_t val = 0x00;
     _writeByte(AXP202_COULOMB_CTL, 1, &val);
-    return AXP_PASS;    
+    return AXP_PASS;
 }
 
 int AXP20X_Class::StopCoulombcounter(void)
 {
-   
-     if (!_init)
-        return AXP_NOT_INIT;    
-     uint8_t val = 0xB8;    
+
+    if (!_init)
+        return AXP_NOT_INIT;
+    uint8_t val = 0xB8;
     _writeByte(AXP202_COULOMB_CTL, 1, &val);
-    return AXP_PASS;    
+    return AXP_PASS;
 }
 
 
 int AXP20X_Class::ClearCoulombcounter(void)
 {
-   
-     if (!_init)
-        return AXP_NOT_INIT;    
-     uint8_t val = 0xA0;    
+
+    if (!_init)
+        return AXP_NOT_INIT;
+    uint8_t val = 0xA0;
     _writeByte(AXP202_COULOMB_CTL, 1, &val);
-    return AXP_PASS;    
+    return AXP_PASS;
 }
 
 //-------------------------------------------------------
-// END 
+// END
 //-------------------------------------------------------
 
 
@@ -631,18 +634,24 @@ int AXP20X_Class::readIRQ()
 {
     if (!_init)
         return AXP_NOT_INIT;
+
+	AXP_DEBUG("readIRQ() : ");
     switch (_chip_id) {
     case AXP192_CHIP_ID:
         for (int i = 0; i < 4; ++i) {
             _readByte(AXP192_INTSTS1 + i, 1, &_irq[i]);
+			AXP_DEBUG("%02x:%02x ", AXP202_INTSTS1 + i, _irq[i]);
         }
         _readByte(AXP192_INTSTS5, 1, &_irq[4]);
+		AXP_DEBUG("%02x:%02x\n", AXP192_INTSTS5, _irq[4]);
         return AXP_PASS;
 
     case AXP202_CHIP_ID:
         for (int i = 0; i < 5; ++i) {
             _readByte(AXP202_INTSTS1 + i, 1, &_irq[i]);
+			AXP_DEBUG("%02x:%02x ", AXP202_INTSTS1 + i, _irq[i]);
         }
+		AXP_DEBUG("\n");
         return AXP_PASS;
     default:
         return AXP_FAIL;
@@ -652,6 +661,7 @@ int AXP20X_Class::readIRQ()
 void AXP20X_Class::clearIRQ()
 {
     uint8_t val = 0xFF;
+	AXP_DEBUG("clearIRQ()\n");
     switch (_chip_id) {
     case AXP192_CHIP_ID:
         for (int i = 0; i < 3; i++) {
@@ -1016,6 +1026,19 @@ int AXP20X_Class::setStartupTime(uint8_t param)
     return AXP_PASS;
 }
 
+int AXP20X_Class::getStartupTime(){
+    uint8_t val;
+	_readByte(AXP202_POK_SET, 1, &val);
+
+	static const int trans[]={
+		13, 30, 10, 20
+	};
+	val &= 0b11000000;
+	AXP_DEBUG("%x -> %x\n", val, val>>6);
+
+	return trans[ val>>6 ];
+}
+
 int AXP20X_Class::setlongPressTime(uint8_t param)
 {
     uint8_t val;
@@ -1030,6 +1053,21 @@ int AXP20X_Class::setlongPressTime(uint8_t param)
     return AXP_PASS;
 }
 
+
+int AXP20X_Class::getlongPressTime(){
+    uint8_t val;
+	_readByte(AXP202_POK_SET, 1, &val);
+
+	static const int trans[]={
+		10, 15, 20, 25
+	};
+	
+	val &= 0b00110000;
+	AXP_DEBUG("%x -> %x\n", val, val>>4);
+
+	return trans[ val>>4 ];
+}
+
 int AXP20X_Class::setShutdownTime(uint8_t param)
 {
     uint8_t val;
@@ -1042,6 +1080,19 @@ int AXP20X_Class::setShutdownTime(uint8_t param)
     val |= shutdownParams[param];
     _writeByte(AXP202_POK_SET, 1, &val);
     return AXP_PASS;
+}
+
+int AXP20X_Class::getShutdownTime(){
+    uint8_t val;
+	_readByte(AXP202_POK_SET, 1, &val);
+
+	static const int trans[]={
+		40, 60, 80, 100
+	};
+	val &= 0b00000011;
+	AXP_DEBUG("%x\n", val);
+
+	return trans[ val ];
 }
 
 int AXP20X_Class::setTimeOutShutdown(bool en)
@@ -1787,7 +1838,7 @@ int AXP20X_Class::setChargeControlCur(uint16_t mA)
     case AXP173_CHIP_ID:
         _readByte(AXP202_CHARGE1, 1, &val);
         val &= 0b11110000;
-        if(mA > AXP1XX_CHARGE_CUR_1320MA)
+        if (mA > AXP1XX_CHARGE_CUR_1320MA)
             mA = AXP1XX_CHARGE_CUR_1320MA;
         val |= mA;
         _writeByte(AXP202_CHARGE1, 1, &val);

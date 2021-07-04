@@ -1467,6 +1467,12 @@ void TFT_eSPI::init(uint8_t tc)
     case 0x9488:/*ILI9488_DRIVER*/
 #include "TFT_Drivers/ILI9488_Init.h"
         break;
+    case 0x9481:/*ILI9481_DRIVER*/
+#include "TFT_Drivers/ILI9481_Init.h"
+        break;
+    case 0x9A01:
+#include "TFT_Drivers/GC9A01A_Init.h"
+        break;
     default:
         break;
     }
@@ -1515,6 +1521,12 @@ void TFT_eSPI::setRotation(uint8_t m)
         break;
     case 0x9488:/*ILI9488_DRIVER*/
 #include "TFT_Drivers/ILI9488_Rotation.h"
+        break;
+    case 0x9481:/*ILI9481_DRIVER*/
+#include "TFT_Drivers/ILI9481_Rotation.h"
+        break;
+    case 0x9A01:
+#include "TFT_Drivers/GC9A01A_Rotation.h"
         break;
     default:
         break;
@@ -8201,6 +8213,40 @@ void TFT_eSPI::setPins(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t cs, uin
 }
 
 
+void TFT_eSPI::writeIndexedPixels(uint8_t *data, uint16_t *idx, uint32_t len)
+{
+    begin_tft_write();
+
+    DC_D;        // Play safe, but should already be in data mode
+
+    while (len--) {
+        tft_Write_16(idx[*(data++)]);
+    }
+
+    CS_L;        // Allow more hold time for low VDI rail
+
+    end_tft_write();
+}
+
+
+void TFT_eSPI::writeIndexedPixelsDouble(uint8_t *data, uint16_t *idx, uint32_t len)
+{
+    uint8_t *d = data;
+    uint16_t p;
+    begin_tft_write();
+
+    DC_D;        // Play safe, but should already be in data mode
+
+    while (len--) {
+        p = idx[*(d++)];
+        tft_Write_16(p);
+        tft_Write_16(p);
+    }
+
+    CS_L;        // Allow more hold time for low VDI rail
+
+    end_tft_write();
+}
 
 
 
